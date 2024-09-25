@@ -55,6 +55,17 @@ class DioAdapter with Recording, RequestHandling implements HttpClientAdapter {
     await setDefaultRequestHeaders(dio, requestOptions);
     final response = await mockResponse(requestOptions) as MockResponse;
 
+    // Check if the delay is heigher than timeout and throw exception.
+    if (response.delay != null &&
+        requestOptions.receiveTimeout != null &&
+        requestOptions.receiveTimeout!.compareTo(response.delay!) < 0) {
+      throw DioException(
+        requestOptions: requestOptions,
+        error: 'Connection Timeout',
+        type: DioExceptionType.receiveTimeout,
+      );
+    }
+
     // Waits for defined duration.
     if (response.delay != null) await Future.delayed(response.delay!);
 
